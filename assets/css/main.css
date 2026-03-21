@@ -2624,16 +2624,20 @@ input, select, textarea {
 		-ms-justify-content: space-between;
 		justify-content: space-between;
 		background-color: #1f1815;
-		background-attachment: scroll,								scroll;
-		background-image: url("images/overlay.png"), url("../../images/Mon.jpeg");
-		background-position: top left,							top left;
+		background-attachment: scroll,								local;
+		/* background-image: url("images/overlay.png"), url("../../images/Mon.png");
+		background-position: top left,							center center;
 		background-repeat: repeat,								no-repeat;
-		/* Tamaño de la imagen que se pone en el banner */
-		background-size: auto,								280%;
+		background-size: auto,								cover; */
+		background-image: url("images/overlay.png");
+		background-position: top left;
+		background-repeat: repeat;
+		background-size: auto;
+
 		color: rgba(255, 255, 255, 0.5);
 		height: 100%;
 		left: 0;
-		padding: 8em 4em;
+		padding: 8em 2%;
 		position: fixed;
 		/* Alineamiento de lo del banner. Para pantallas pequeñas es distinto */
 		text-align: center;
@@ -2684,8 +2688,32 @@ input, select, textarea {
 		}
 	
 			#header .icons a {
-				color: rgba(255, 255, 255, 0.4);
+				color: rgba(255, 255, 255, 0.6);
 			}
+		#header a {
+		color: #7de8c4;  /* brighter than #49bf9d */
+		text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+		}
+#header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)),
+        url("../../images/Mon.png");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 0;
+}
+
+#header > * {
+    position: relative;
+    z-index: 1;
+}
 
 /* Footer */
 
@@ -2694,11 +2722,11 @@ input, select, textarea {
 	}
 
 		#footer .icons a {
-			color: rgba(255, 255, 255, 0.4);
+			color: rgba(255, 255, 255, 0.6);
 		}
 
 	#footer .copyright {
-		color: rgba(255, 255, 255, 0.4);
+		color: rgba(255, 255, 255, 0.6);
 		font-size: 0.8em;
 		list-style: none;
 		margin: 1em 0 0 0;
@@ -2706,7 +2734,7 @@ input, select, textarea {
 	}
 
 		#footer .copyright li {
-			border-left: solid 1px rgba(255, 255, 255, 0.25);
+			border-left: solid 1px rgba(255, 255, 255, 0.4);
 			display: inline-block;
 			line-height: 1em;
 			margin-left: 0.75em;
@@ -2727,12 +2755,12 @@ input, select, textarea {
 
 	#main {
 		/* Este margen empieza desde la izda de la pantalla. Hay que tener en cuenta el ancho del banner (25% ahora)  */
-		margin-left: 26%;
+		margin-left: 25%;
 		/* Me he cargado el máximo y parece que va todo automático con la width de abajo */
 		/* max-width: 54em; */
-		padding: 8em 4em 4em 4em;
+		padding: 8em 2% 4em 2%;
 		/* He puesto 5% demás en el left, así que quito otros 5% para tenerlos a la dcha y que quede simétrico*/
-		width: calc(100% - 26%);
+		width: calc(100% - 25%);
 	}
 
 		#main > section {
@@ -3046,8 +3074,8 @@ input, select, textarea {
 		/* Header */
 
 			#header {
-				padding: 6em 3em 3em 3em;
-				width: 25%;
+				padding: 6em 2% 3em 2%;
+				width: 22%;
 			}
 
 				#header h1 {
@@ -3075,10 +3103,10 @@ input, select, textarea {
 		/* Main */
 
 			#main {
-				margin-left: 30%;
+				margin-left: 22%;
 				max-width: none;
-				padding: 6em 3em 3em 3em;
-				width: calc(100% - 30%);
+				padding: 6em 2% 3em 2%;
+				width: calc(100% - 22%);
 			}
 
 	}
@@ -3103,12 +3131,12 @@ input, select, textarea {
 
 			#header {
 				/* Usamos la montaña cuadrada para móvil */
-				background-image: url("images/overlay.png"), url("../../images/Mon2.jpeg");
+				background-image: url("images/overlay.png"), url("../../images/Mon2.png");
 				background-attachment: scroll;
 				background-position: top left, center center;
 				background-size: auto,		cover;
 				left: auto;
-				padding: 3em 4em;
+				padding: 2em 4em;
 				position: relative;
 				text-align: center;
 				top: auto;
@@ -3126,13 +3154,22 @@ input, select, textarea {
 					#header h1 br {
 						display: inline;
 					}
-
+		
+		/* header:before */			
+		#header::before {
+            background-image: 
+        linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)),
+        url("../../images/Mon2.png");
+        background-position: center center;
+    	}				
 		/* Footer */
 
 			#footer {
 				background-attachment: scroll;
 				background-color: #1f1815;
-				background-image: url("images/overlay.png"), url("../../images/Mon.jpeg");
+				/* background-image: url("images/overlay.png"), url("../../images/Mon.png"); */
+				background-image: none;
+        		background: linear-gradient(to bottom, #1f1815, #0d0b0a);
 				background-position: top left,						bottom center;
 				background-repeat: repeat,							no-repeat;
 				background-size: auto,							cover;
@@ -3164,7 +3201,7 @@ input, select, textarea {
 
 			#main {
 				margin: 0;
-				padding: 6em 4em;
+				padding: 3em 2%;
 				width: 100%;
 			}
 
@@ -3232,12 +3269,12 @@ input, select, textarea {
 		/* Main */
 
 			#main {
-				padding: 2.25em 1.5em 2.25em 1.5em;
+				padding: 2.25em 2% 2.25em 2%;
 			}
 
 				#main > section {
-					margin: 2.25em 0 0 0;
-					padding: 2.25em 0 0 0;
+					margin: 0 0 0 0;
+					padding: 2.25em 2%;
 				}
 
 				#main > section:first-child {
@@ -3284,3 +3321,94 @@ input, select, textarea {
 			}
 
 	}
+
+/* ===================== DARK MODE ===================== */
+
+body {
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+#main {
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+	/* Teal grey */
+    /* background: #16201E; */
+	background: #1E2329;
+    color: #c0c0c0;
+}
+
+body.dark-mode #main {
+	/* Teal grey */
+    /* background: #16201E; */
+	background: #1E2329;
+}
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+    color: #d0d0d0;
+}
+
+body.dark-mode strong,
+body.dark-mode b {
+    color: #e0e0e0;
+}
+
+body.dark-mode hr,
+body.dark-mode #main > section {
+    border-color: #333;
+}
+
+body.dark-mode ul.alt li {
+    border-color: #333;
+}
+
+body.dark-mode table tbody tr {
+    border-color: #333;
+}
+
+body.dark-mode table tbody tr:nth-child(2n + 1) {
+    background-color: #252535;
+}
+
+body.dark-mode table thead {
+    border-color: #333;
+}
+
+body.dark-mode code {
+    background: #252535;
+    border-color: #333;
+}
+
+body.dark-mode p {
+    color: #c0c0c0;
+}
+
+body.dark-mode ul li {
+    color: #c0c0c0;
+}
+
+/* Toggle button */
+#dark-mode-toggle {
+    position: absolute;
+    top: 0.8em;
+    left: 0.8em;
+    z-index: 2;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.6);
+    border-radius: 50%;
+    width: 2.2em;
+    height: 2.2em;
+    cursor: pointer;
+    font-size: 1em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
