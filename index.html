@@ -19,15 +19,23 @@
 		<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
 		<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
 		<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+		<button id="dark-mode-toggle" title="Toggle dark mode">
+    			<i class="fas fa-moon"></i>
+		</button>
+		<script>
+			(function() {
+				const saved = localStorage.getItem('darkMode');
+				if (saved === null || saved === 'true') {
+					document.body.classList.add('dark-mode');
+				}
+			})();
+		</script>
 	</head>
 
 	<body class="is-preload">
 
 		<!-- Header -->
 			<header id="header">
-			<button id="dark-mode-toggle" title="Toggle dark mode">
-    			<i class="fas fa-moon"></i>
-			</button>
 				<div class="inner">
 					<!-- <a href="#" class="image avatar"><img src="images/Rodrigo.jpeg" alt="" /></a> -->
 					<a class="image avatar"><img src="images/Rodrigo.JPG" alt="" /></a>
