@@ -2758,7 +2758,7 @@ input, select, textarea {
 		margin-left: 25%;
 		/* Me he cargado el máximo y parece que va todo automático con la width de abajo */
 		/* max-width: 54em; */
-		padding: 8em 2% 4em 2%;
+		padding: 6em 2% 2em 2%;
 		/* He puesto 5% demás en el left, así que quito otros 5% para tenerlos a la dcha y que quede simétrico*/
 		width: calc(100% - 25%);
 	}
@@ -3176,7 +3176,7 @@ input, select, textarea {
 				background-size: auto,							cover;
 				bottom: auto;
 				left: auto;
-				padding: 4em 4em 6em 4em;
+				padding: 4em 4em 3em 4em;
 				position: relative;
 				text-align: center;
 				width: 100%;
@@ -3270,7 +3270,7 @@ input, select, textarea {
 		/* Main */
 
 			#main {
-				padding: 2.25em 2% 2.25em 2%;
+				padding: 2.25em 2% 1em 2%;
 			}
 
 				#main > section {
@@ -3322,6 +3322,20 @@ input, select, textarea {
 			}
 
 	}
+
+/* Hide the bottom copyright on small screens */
+@media screen and (max-width: 980px) {
+    .main-copyright {
+        display: none;
+    }
+}
+
+/* Hide the footer copyright on large screens */
+@media screen and (min-width: 981px) {
+    #footer .copyright {
+        display: none;
+    }
+}
 
 /* ===================== DARK MODE ===================== */
 
