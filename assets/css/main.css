@@ -3161,7 +3161,7 @@ input, select, textarea {
         linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)),
         url("../../images/Mon2.png");
         background-position: center center;
-    	}				
+    	}		
 		/* Footer */
 
 			#footer {
@@ -3169,7 +3169,8 @@ input, select, textarea {
 				background-color: #1f1815;
 				/* background-image: url("images/overlay.png"), url("../../images/Mon.png"); */
 				background-image: none;
-        		background: linear-gradient(to bottom, #1f1815, #0d0b0a);
+        		background: linear-gradient(to bottom, #1E2329, #1E2329);
+				border-top: solid 2px #333;
 				background-position: top left,						bottom center;
 				background-repeat: repeat,							no-repeat;
 				background-size: auto,							cover;
@@ -3196,7 +3197,7 @@ input, select, textarea {
 						margin-left: 0.75em;
 						padding-left: 0.75em;
 					}
-
+					
 		/* Main */
 
 			#main {
@@ -3395,10 +3396,10 @@ body.dark-mode ul li {
 
 /* Toggle button */
 #dark-mode-toggle {
-    position: absolute;
+    position: fixed;
     top: 0.8em;
     left: 0.8em;
-    z-index: 2;
+    z-index: 9999;  
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.2);
     color: rgba(255,255,255,0.6);
@@ -3411,4 +3412,17 @@ body.dark-mode ul li {
     align-items: center;
     justify-content: center;
     transition: background 0.2s, color 0.2s;
+}
+
+@media screen and (max-width: 980px) {
+    body {
+        position: relative;
+    }
+
+    #dark-mode-toggle {
+        position: absolute;
+        top: 0.8em;
+        left: 0.8em;
+        z-index: 9999;
+    }
 }
