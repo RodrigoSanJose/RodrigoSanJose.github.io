@@ -3408,38 +3408,37 @@ body.dark-mode ul li {
     color: #c0c0c0;
 }
 
-/* Toggle button */
+/* Toggle button - Locked in Pixels */
 #dark-mode-toggle {
     position: fixed;
-    top: 0.9em;          
-    left: 0.9em;         
+    top: 15px;          
+    left: 15px;         
     z-index: 9999;  
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.2);
     color: rgba(255,255,255,0.6);
     border-radius: 50%;
     
-    width: 1.7em;        
-    height: 1.7em;       
+    /* Fixed pixel dimensions stop it from morphing on mobile */
+    width: 45px;        
+    height: 45px;       
     
     cursor: pointer;
-    font-size: 1.3em;    
+    font-size: 25px;    /* Fixed icon size */
     
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    /* The centering fixes */
     padding: 0;
     line-height: 1;
     
     transition: background 0.2s, color 0.2s;
 }
 
-/* Nudge the sun/moon icon to visually center it */
 #dark-mode-toggle i {
     position: relative;
-    top: 1px; /* A positive value pushes it DOWN */
+    top: 0.5px; 
 }
 
 @media screen and (max-width: 980px) {
