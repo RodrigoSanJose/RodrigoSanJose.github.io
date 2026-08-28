@@ -3374,8 +3374,8 @@ body.dark-mode b {
     color: #e0e0e0;
 }
 
-body.dark-mode hr,
-body.dark-mode #main > section {
+.dark-mode hr,
+.dark-mode #main > section {
     border-color: #333;
 }
 
