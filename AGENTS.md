@@ -68,7 +68,7 @@ python -B -m unittest discover -s tests -v
 
 ## README edits
 
-Keep `README.md` limited to the website link unless the user explicitly requests
-additional README content. Before any README edit, explicitly tell the user that
+Preserve the original README title and webpage link unless the user explicitly
+requests a content change. Before any README edit, explicitly tell the user that
 `README.md` will be changed and describe the intended change. Never silently add
 analytics, maintenance, testing, or other documentation to the README.
