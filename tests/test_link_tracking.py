@@ -540,23 +540,43 @@ class LinkTrackingTests(unittest.TestCase):
         self.page.wait_for_url(self.base + "/books.html")
         self.assertEqual(len(self.events), 1)
         self.page.evaluate("delete window.umami")
-        self.page.locator('a[href="index.html"]').focus()
+        self.page.locator('#header nav.site-nav a[href="/"]').focus()
         self.page.keyboard.press("Enter")
-        self.page.wait_for_url(self.base + "/index.html")
+        self.page.wait_for_url(self.base + "/")
         self.assertEqual(len(self.events), 1)
 
     def test_books_home_return_has_one_descriptive_event(self):
         self.page.goto(self.base + "/books.html", wait_until="load")
-        self.page.locator('a[href="index.html"]').click()
-        self.page.wait_for_url(self.base + "/index.html")
+        self.page.locator('#header nav.site-nav a[href="/"]').click()
+        self.page.wait_for_url(self.base + "/")
         self.assertEqual(self.events, [{
             "name": "Home",
             "data": {
                 "label": "Home",
-                "url": self.base + "/index.html",
-                "section": "Tier Lists",
+                "url": self.base + "/",
+                "section": "Navigation",
             },
         }])
+        self.assertEqual(self.errors, [])
+
+    def test_site_navigation_marks_the_current_page_and_tracks_the_others(self):
+        for filename, current, links in (
+            ("index.html", "Home", (("/ghw-tables/", "GHW tables"), ("/books.html", "Tier lists"))),
+            ("books.html", "Tier lists", (("/", "Home"), ("/ghw-tables/", "GHW tables"))),
+        ):
+            with self.subTest(page=filename):
+                self.page.goto(self.base + "/" + filename, wait_until="load")
+                self.prevent_navigation()
+                nav = self.page.locator("#header nav.site-nav")
+                self.assertEqual(nav.locator('[aria-current="page"]').text_content(), current)
+                self.assertEqual(nav.locator("a").count(), 2)
+                for href, name in links:
+                    self.page.evaluate("window.__analyticsEvents.length = 0")
+                    self.dispatch(f'#header nav.site-nav a[href="{href}"]')
+                    self.assertEqual(self.mock_events(), [{
+                        "name": name,
+                        "data": {"label": name, "url": self.base + href, "section": "Navigation"},
+                    }])
         self.assertEqual(self.errors, [])
 
     def test_modifier_middle_and_blank_target_preserve_new_tabs(self):

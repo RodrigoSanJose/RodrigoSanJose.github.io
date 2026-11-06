@@ -3453,3 +3453,44 @@ body.dark-mode ul li {
         z-index: 9999;
     }
 }
+
+/* Navigation between the pages of the site (main page, GHW tables, tier lists), in the header.
+   The same block is in index.html, books.html and ghw-tables/index.html; the current page is the
+   highlighted one, which is not a link. Without this style it reads "Home · GHW tables · Tier lists". */
+.site-nav {
+    margin: 1.5em 0 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5em;
+}
+
+.site-nav-separator {
+    display: none;
+}
+
+.site-nav a,
+.site-nav [aria-current="page"] {
+    display: inline-block;
+    padding: 0.15em 0.9em;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 0.85em;
+    line-height: 1.8;
+    white-space: nowrap;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.site-nav a:hover,
+.site-nav a:focus-visible {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.site-nav [aria-current="page"] {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: transparent;
+    color: #222;
+    font-weight: 600;
+}
