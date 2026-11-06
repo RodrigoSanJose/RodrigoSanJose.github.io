@@ -142,7 +142,7 @@ class LinkTrackingTests(unittest.TestCase):
             event_type, {"button": button, "bubbles": True, "cancelable": True}
         )
 
-    def test_every_existing_link_has_one_descriptive_event(self):
+    def test_every_existing_link_and_control_has_one_descriptive_event(self):
         totals = {}
         publications = []
         quote_events = []
@@ -163,28 +163,50 @@ class LinkTrackingTests(unittest.TestCase):
                 self.assertEqual(loaders[0]["websiteId"], UMAMI_WEBSITE_ID)
                 sweep = self.page.evaluate(r"""() => {
                     document.addEventListener('click', event => event.preventDefault());
-                    const links = Array.from(document.querySelectorAll('a[href], area[href]'));
-                    const eligible = link => /^(https?:|mailto:|tel:)$/.test(link.protocol) &&
-                        !link.closest('[data-analytics-ignore], [data-umami-event]');
-                    const inventory = {
-                        links: links.length,
-                        eligibleLinks: links.filter(eligible).length,
-                        publications: links.filter(link => eligible(link) && link.closest('[data-publication-title]')).length,
-                        quotes: links.filter(link => eligible(link) && link.closest('[data-analytics-section^="Quotes"]')).length
+                    const controls = Array.from(document.querySelectorAll(
+                        'a[href], area[href], button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]'));
+                    const isLink = control => control.matches('a[href], area[href]');
+                    const destination = control => new URL(
+                        isLink(control) ? control.getAttribute('href') : location.href, document.baseURI);
+                    const eligible = control => /^(https?:|mailto:|tel:)$/.test(destination(control).protocol) &&
+                        !control.closest('[data-analytics-ignore], [data-umami-event], [inert], [aria-disabled="true"]') &&
+                        !control.matches(':disabled, [disabled]');
+                    const declaredLabel = control => {
+                        const labelledBy = (control.getAttribute('aria-labelledby') || '').split(/\s+/)
+                            .map(id => document.getElementById(id)?.textContent || '').join(' ');
+                        return [labelledBy, control.getAttribute('aria-label'), control.getAttribute('title'),
+                            control.textContent, control.querySelector('img[alt]')?.getAttribute('alt')]
+                            .find(label => label && label.trim())?.trim() || '';
                     };
-                    const rows = links.map(link => {
+                    const inventory = {
+                        controls: controls.length,
+                        eligibleControls: controls.filter(eligible).length,
+                        publications: controls.filter(control => eligible(control) && control.closest('[data-publication-title]')).length,
+                        quotes: controls.filter(control => eligible(control) && control.closest('[data-analytics-section^="Quotes"]')).length
+                    };
+                    const rows = controls.map(control => {
                         const before = window.__analyticsEvents.length;
-                        link.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, button: 0}));
-                        const quoteSection = link.closest('[data-analytics-section^="Quotes"]');
+                        control.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, button: 0}));
+                        const quoteSection = control.closest('[data-analytics-section^="Quotes"]');
+                        const numericContext = {};
+                        for (const key of ['q', 'm', 'd', 'r']) {
+                            const attribute = 'data-analytics-' + key;
+                            const raw = control.closest('[' + attribute + ']')?.getAttribute(attribute).trim();
+                            if (raw && /^\d+$/.test(raw) && Number.isSafeInteger(Number(raw))) numericContext[key] = Number(raw);
+                        }
                         return {
-                            href: link.href,
-                            eligible: eligible(link),
-                            publication: link.closest('[data-publication-title]')?.getAttribute('data-publication-title'),
-                            publicationSection: Boolean(link.closest('[data-publications]')) ||
+                            control: control.tagName + (control.id ? '#' + control.id : ''),
+                            href: destination(control).href,
+                            eligible: eligible(control),
+                            action: !isLink(control),
+                            declaredLabel: declaredLabel(control),
+                            numericContext,
+                            publication: control.closest('[data-publication-title]')?.getAttribute('data-publication-title'),
+                            publicationSection: Boolean(control.closest('[data-publications]')) ||
                                 /^(Journal papers|Conference papers|Preprints)$/.test(
-                                    link.closest('section')?.querySelector('h2')?.textContent.trim() || ''),
+                                    control.closest('section')?.querySelector('h2')?.textContent.trim() || ''),
                             quote: Boolean(quoteSection),
-                            quoteNumber: quoteSection && link.textContent.trim().match(/^\[(\d+)\]$/)?.[1],
+                            quoteNumber: quoteSection && control.textContent.trim().match(/^\[(\d+)\]$/)?.[1],
                             quoteCategory: quoteSection && quoteSection.firstChild.textContent.trim().replace(/:$/, ''),
                             events: window.__analyticsEvents.slice(before)
                         };
@@ -192,15 +214,18 @@ class LinkTrackingTests(unittest.TestCase):
                     return {inventory, rows};
                 }""")
                 totals[filename] = sweep["inventory"]
-                self.assertEqual(len(sweep["rows"]), sweep["inventory"]["links"])
+                self.assertEqual(len(sweep["rows"]), sweep["inventory"]["controls"])
                 for row in sweep["rows"]:
-                    with self.subTest(href=row["href"]):
+                    with self.subTest(control=row["control"], href=row["href"]):
                         if row["publicationSection"]:
                             self.assertTrue(row["publication"] and row["publication"].strip(),
                                             "Publication link is missing its shared title wrapper")
                         self.assertEqual(len(row["events"]), 1 if row["eligible"] else 0)
                         if not row["eligible"]:
                             continue
+                        if row["action"]:
+                            self.assertTrue(row["declaredLabel"],
+                                            "Action control needs descriptive visible text or an accessible label")
                         event = row["events"][0]
                         self.assertTrue(event["name"].strip())
                         self.assertLessEqual(len(event["name"]), 50)
@@ -208,7 +233,9 @@ class LinkTrackingTests(unittest.TestCase):
                         self.assertEqual(event["data"]["url"], row["href"])
                         self.assertTrue(event["data"]["label"])
                         self.assertTrue(event["data"]["section"])
-                        self.assertEqual(set(event["data"]), {"label", "url", "section"})
+                        self.assertEqual(set(event["data"]), {"label", "url", "section"} | set(row["numericContext"]))
+                        for key, value in row["numericContext"].items():
+                            self.assertEqual(event["data"][key], value)
                         if row["publication"]:
                             self.assertTrue(event["data"]["label"].startswith(row["publication"] + ". "))
                             destination_type = event["data"]["label"][len(row["publication"]) + 2:]
@@ -232,7 +259,7 @@ class LinkTrackingTests(unittest.TestCase):
                                 self.assertNotRegex(event["name"], r"^[\d\s\[\]().,]+$")
                                 self.assertNotRegex(event["data"]["label"], r"^[\d\s\[\]().,]+$")
                             quote_events.append(event)
-        self.assertGreater(sum(inventory["eligibleLinks"] for inventory in totals.values()), 0)
+        self.assertGreater(sum(inventory["eligibleControls"] for inventory in totals.values()), 0)
         self.assertEqual(len(publications), sum(inventory["publications"] for inventory in totals.values()))
         self.assertEqual(len(quote_events), sum(inventory["quotes"] for inventory in totals.values()))
         for events in (publications, quote_events):
@@ -377,6 +404,98 @@ class LinkTrackingTests(unittest.TestCase):
         self.dispatch(selector, "click", 2)
         self.assertEqual([event["name"] for event in self.mock_events()], ["GitHub", "GitHub"])
 
+    def test_dynamic_native_buttons_keyboard_and_numeric_context(self):
+        self.page.evaluate("""() => {
+            const section = document.createElement('section');
+            section.setAttribute('data-analytics-section', 'Future GHW controls');
+            section.setAttribute('data-analytics-q', '4');
+            section.setAttribute('data-analytics-m', '3');
+            section.setAttribute('data-analytics-d', '9');
+            section.setAttribute('data-analytics-r', '1');
+            section.innerHTML = `
+                <div data-analytics-r="2" data-user-email="private@example.test">
+                    <button id="future-button" type="button" aria-label="Show future GHW parameters"
+                            value="private visitor value" data-arbitrary="private visitor metadata">
+                        <span><svg aria-hidden="true" width="10" height="10"><path d="M0 0h10v10H0z"></path></svg></span>
+                    </button>
+                    <input id="future-input" type="button" aria-label="Reset future GHW filters"
+                           value="private visitor value" data-arbitrary="private visitor metadata">
+                    <input id="unlabelled-input" type="button" value="private visitor value"
+                           data-analytics-q="4.5" data-analytics-m="-3" data-analytics-d="NaN"
+                           data-analytics-r="9007199254740992">
+                    <input type="text" name="private-name" value="private form contents">
+                </div>`;
+            window.__nativeActivations = 0;
+            section.addEventListener('click', () => window.__nativeActivations++);
+            document.getElementById('main').append(section);
+        }""")
+        # Reinclusion must not duplicate the delegated button handler either.
+        self.page.add_script_tag(url=self.base + "/assets/js/link-tracking.js")
+        self.page.locator("#future-button svg").click()
+        self.page.locator("#future-button").focus()
+        for count, key in ((2, "Enter"), (3, "Space")):
+            with self.subTest(key=key):
+                self.page.keyboard.press(key)
+                self.assertEqual(len(self.mock_events()), count)
+                self.assertEqual(self.page.evaluate("window.__nativeActivations"), count)
+        self.dispatch("#future-button svg", "auxclick", 1)
+        self.assertEqual(len(self.mock_events()), 3)
+        self.page.locator("#future-input").click()
+        events = self.mock_events()
+        self.assertEqual(len(events), 4)
+        self.assertEqual(self.page.evaluate("window.__nativeActivations"), 4)
+        for index, event in enumerate(events):
+            label = "Show future GHW parameters" if index < 3 else "Reset future GHW filters"
+            self.assertEqual(event, {
+                "name": label,
+                "data": {
+                    "label": label,
+                    "url": self.base + "/index.html",
+                    "section": "Future GHW controls",
+                    "q": 4, "m": 3, "d": 9, "r": 2,
+                },
+            })
+        # Input values are never label fallbacks; invalid table metadata and
+        # arbitrary data attributes must not become analytics properties.
+        self.page.locator("#unlabelled-input").click()
+        self.assertEqual(self.mock_events()[-1], {
+            "name": "Button",
+            "data": {
+                "label": "Button",
+                "url": self.base + "/index.html",
+                "section": "Future GHW controls",
+            },
+        })
+        self.assertEqual(self.errors, [])
+
+    def test_disabled_inert_and_native_event_controls_are_excluded(self):
+        self.page.evaluate("""() => {
+            document.body.insertAdjacentHTML('beforeend', `
+                <button id="disabled-control" disabled><span>Disabled button</span></button>
+                <fieldset disabled><button id="disabled-fieldset-control"><span>Disabled fieldset</span></button></fieldset>
+                <div inert><button id="inert-control"><span>Inert button</span></button></div>
+                <button id="aria-disabled-control" aria-disabled="true"><span>Unavailable button</span></button>
+                <div aria-disabled="true"><button id="aria-disabled-parent-control"><span>Unavailable group</span></button></div>
+                <div data-analytics-ignore><button id="ignored-control"><span>Ignored button</span></button></div>
+                <button id="native-control" data-umami-event="Native event"><span>Native button</span></button>
+                <div data-umami-event="Native group"><button id="native-parent-control"><span>Native group button</span></button></div>
+                <button id="native-icon-control"><span data-umami-event="Native icon">Native icon</span></button>
+                <button id="ignored-icon-control"><span data-analytics-ignore>Ignored icon</span></button>
+                <button id="inert-icon-control"><span inert>Inert icon</span></button>
+                <button id="aria-disabled-icon-control"><span aria-disabled="true">Unavailable icon</span></button>`);
+        }""")
+        for control_id in (
+            "disabled-control", "disabled-fieldset-control", "inert-control", "aria-disabled-control",
+            "aria-disabled-parent-control", "ignored-control", "native-control", "native-parent-control",
+            "native-icon-control", "ignored-icon-control", "inert-icon-control", "aria-disabled-icon-control",
+        ):
+            with self.subTest(control=control_id):
+                # Synthetic dispatch reaches the delegate even where the browser
+                # suppresses physical activation of disabled or inert controls.
+                self.dispatch("#" + control_id + " span")
+                self.assertEqual(self.mock_events(), [])
+        self.assertEqual(self.errors, [])
+
     def test_tracking_failures_are_harmless_and_late_loading_works(self):
         self.prevent_navigation()
         self.page.evaluate("window.__savedUmami = window.umami; delete window.umami")
@@ -425,6 +544,20 @@ class LinkTrackingTests(unittest.TestCase):
         self.page.keyboard.press("Enter")
         self.page.wait_for_url(self.base + "/index.html")
         self.assertEqual(len(self.events), 1)
+
+    def test_books_home_return_has_one_descriptive_event(self):
+        self.page.goto(self.base + "/books.html", wait_until="load")
+        self.page.locator('a[href="index.html"]').click()
+        self.page.wait_for_url(self.base + "/index.html")
+        self.assertEqual(self.events, [{
+            "name": "Home",
+            "data": {
+                "label": "Home",
+                "url": self.base + "/index.html",
+                "section": "Tier Lists",
+            },
+        }])
+        self.assertEqual(self.errors, [])
 
     def test_modifier_middle_and_blank_target_preserve_new_tabs(self):
         for click_options in ({"modifiers": ["Control"]}, {"button": "middle"}, {}):

@@ -33,7 +33,7 @@ python -B -m unittest discover -s tests -v
 
 - Every website content update includes tracking by default; the user does not
   need to request it separately. This applies to all new/changed links, quotes
-  and their sources/attributions, navigation, profiles, icons/images, downloads,
+  and their sources/attributions, buttons, navigation, profiles, icons/images, downloads,
   papers, pages, and dynamically generated links. Reuse the shared delegated
   handler and preserve intentional exclusions and opt-out behavior.
 - Give ordinary links descriptive visible text or accessible labels; avoid
@@ -43,6 +43,10 @@ python -B -m unittest discover -s tests -v
   category; retain the complete description in `label`. Cover attribution/source
   links too. Use existing shared metadata for ambiguous or long labels instead
   of adding listeners or direct tracker calls.
+- Use native buttons for actions so mouse, Enter, and Space all produce one
+  tracked click. Custom keyboard handlers must invoke the same activation path
+  once. Preserve disabled, inert, native Umami, and explicit ignore exclusions.
+  Never collect input values or form contents for button labels/properties.
 - For papers, reuse the shared publication wrapper: put the full title once in
   `data-publication-title` and
   keep every paper destination inside it. `assets/js/link-tracking.js` derives
@@ -59,6 +63,13 @@ python -B -m unittest discover -s tests -v
   paths appropriate to that page and the existing website ID. Preserve the
   shared timer's configured milestones, visible-only accumulation, navigation
   lifecycle, memory-only state, and duplicate guards.
+- The same helpers serve the separate `ghw-tables` repository through
+  `/assets/js/link-tracking.js` and `/assets/js/page-visibility.js`. Its renderer
+  supplies semantic names and only mathematical `data-analytics-q/m/d/r` values;
+  the shared handler sends these as numeric properties. When changing shared
+  helpers, also run GHW's protected browser tests against this checkout (set
+  `PERSONAL_SITE_ROOT` if it is not beside `ghw-tables`). Do not duplicate the
+  helpers or install another Umami loader on either site.
 - For every added/changed link or quote, including every paper destination,
   verify its descriptive name, full label, URL, placement, and exactly one event
   per activation (or its intentional tracking exclusion), with normal navigation.

@@ -93,24 +93,53 @@
 		return decodeURIComponent(url.pathname.split('/').filter(Boolean).pop() || url.hostname);
 	}
 
+	function tableContext(control, data) {
+		// Only mathematical parameters explicitly supplied by the table renderer.
+		// Never copy arbitrary data attributes, input values, or form contents.
+		['q', 'm', 'd', 'r'].forEach(function(key) {
+			var attribute = 'data-analytics-' + key;
+			var owner = control.closest('[' + attribute + ']');
+			var raw = owner && clean(owner.getAttribute(attribute));
+			if (!raw || !/^\d+$/.test(raw)) return;
+			var value = Number(raw);
+			if (Number.isSafeInteger(value)) data[key] = value;
+		});
+	}
+
+	function buttonLabel(control) {
+		var label = clean(control.getAttribute('data-analytics-label')) || accessibleLabel(control);
+		if (label) return label;
+		var type = (control.getAttribute('type') || '').toLowerCase();
+		if (type === 'submit') return 'Submit form';
+		if (type === 'reset') return 'Reset form';
+		return 'Button';
+	}
+
 	function trackActivation(event) {
 		if ((event.type === 'click' && event.button !== 0) ||
 			(event.type === 'auxclick' && event.button !== 1)) return;
 		var target = event.target;
-		var link = target && target.closest && target.closest('a[href], area[href]');
-		if (!link || link.closest('[data-analytics-ignore]')) return;
+		var control = target && target.closest && target.closest(
+			'a[href], area[href], button, input[type="button"], input[type="submit"], input[type="reset"], [role="button"]'
+		);
+		if (!control || target.closest('[data-analytics-ignore], [inert], [aria-disabled="true"]') ||
+			control.closest('[data-analytics-ignore], [inert], [aria-disabled="true"]') ||
+			control.matches(':disabled, [disabled]')) return;
+		var link = control.matches('a[href], area[href]') ? control : null;
+		// Middle-click activates links, not ordinary buttons.
+		if (event.type === 'auxclick' && !link) return;
 		// Native Umami attribute events have their own listener. Do not double count.
-		if (link.closest('[data-umami-event]')) return;
+		if (target.closest('[data-umami-event]') || control.closest('[data-umami-event]')) return;
 		if (!window.umami || typeof window.umami.track !== 'function') return;
 
 		try {
-			var url = new URL(link.getAttribute('href'), document.baseURI);
+			var url = new URL(link ? link.getAttribute('href') : location.href, document.baseURI);
 			if (!/^(https?:|mailto:|tel:)$/.test(url.protocol)) return;
-			var publication = link.closest('[data-publication-title]');
+			var publication = control.closest('[data-publication-title]');
 			var label, name;
 			if (publication) {
 				var title = clean(publication.getAttribute('data-publication-title')).replace(/\.$/, '');
-				var type = destinationType(link, url);
+				var type = destinationType(control, url);
 				label = title + '. ' + type;
 				// Bound custom future destination labels as well as paper titles.
 				// The standard destination types fit unchanged in this budget.
@@ -118,16 +147,14 @@
 				var shortTitle = clean(publication.getAttribute('data-publication-short')) || title;
 				name = label.length <= maxNameLength ? label : compact(shortTitle, maxNameLength - ending.length) + ending;
 			} else {
-				label = linkLabel(link, url);
-				name = compact(clean(link.getAttribute('data-analytics-name')) || label, maxNameLength);
+				label = link ? linkLabel(control, url) : buttonLabel(control);
+				name = compact(clean(control.getAttribute('data-analytics-name')) || label, maxNameLength);
 			}
+			var data = { label: label, url: url.href, section: placement(control) };
+			tableContext(control, data);
 			// Use only the existing API: it retains Umami's exclusions/opt-out rules.
 			// Never delay, cancel, or reimplement navigation, including modifier clicks.
-			var result = window.umami.track(name, {
-				label: label,
-				url: url.href,
-				section: placement(link)
-			});
+			var result = window.umami.track(name, data);
 			if (result && typeof result.catch === 'function') result.catch(function() {});
 		} catch (error) {
 			// Analytics is optional: blocked storage, invalid URLs, or tracker errors
