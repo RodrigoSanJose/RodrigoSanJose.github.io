@@ -65,3 +65,10 @@ python -B -m unittest discover -s tests -v
   Run the protected tests above; they discover content pages and sweep their
   links. Verify new pages include both shared scripts and preserve timer behavior.
   Always use the opt-out and mocked/intercepted analytics rules above.
+
+## README edits
+
+Keep `README.md` limited to the website link unless the user explicitly requests
+additional README content. Before any README edit, explicitly tell the user that
+`README.md` will be changed and describe the intended change. Never silently add
+analytics, maintenance, testing, or other documentation to the README.
