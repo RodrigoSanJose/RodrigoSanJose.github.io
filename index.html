@@ -21,7 +21,15 @@
 			document.documentElement.classList.add('mj-loading');
 			function mjShow() { document.documentElement.classList.remove('mj-loading'); }
 			setTimeout(mjShow, 3000); // fall back to showing the raw LaTeX if MathJax fails to load
-			window.MathJax = { startup: { pageReady: () => MathJax.startup.defaultPageReady().then(mjShow) } };
+			window.MathJax = {
+				startup: { pageReady: () => MathJax.startup.defaultPageReady().then(mjShow) },
+				// MathJax 4 would also compute a spoken description and Braille for every formula, after
+				// downloading a large speech engine, which makes the page slower: skip it. Screen readers
+				// still read the formulas, through the hidden MathML that MathJax then adds to each of them
+				// (assistive MathML). These are the defaults of the MathJax menu (right click on a formula),
+				// where a reader can still turn speech on. The GHW tables page uses the same settings.
+				options: { menuOptions: { settings: { enrich: false, speech: false, braille: false, assistiveMml: true } } }
+			};
 		</script>
 		<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4.1.3/tex-chtml.js"></script>
 
