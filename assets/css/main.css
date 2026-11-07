@@ -3475,7 +3475,7 @@ body.dark-mode ul li {
     padding: 0.15em 0.9em;
     border-radius: 999px;
     border: 1px solid rgba(255, 255, 255, 0.35);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.20);
     font-size: 0.85em;
     line-height: 1.8;
     white-space: nowrap;
@@ -3484,7 +3484,7 @@ body.dark-mode ul li {
 
 .site-nav a:hover,
 .site-nav a:focus-visible {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.30);
     border-color: rgba(255, 255, 255, 0.6);
 }
 
