@@ -3,7 +3,7 @@
 <!--
 	Based on Strata by HTML5 UP
 -->
-<html>
+<html lang="en">
 	<head>
 		<script defer src="assets/js/link-tracking.js"></script>
 		<script defer src="assets/js/page-visibility.js"></script>
@@ -42,7 +42,8 @@
 		<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
 		<script>
 			(function() {
-				const saved = localStorage.getItem('darkMode');
+				let saved = null;
+				try { saved = localStorage.getItem('darkMode'); } catch (error) {}   // blocked site data: dark by default
 				if (saved === null || saved === 'true') {
 					document.documentElement.classList.add('dark-mode');
 				}
@@ -303,8 +304,10 @@
 			const icon = toggle.querySelector('i');
 
 			// Default to dark mode unless user has explicitly chosen light
-			const savedMode = localStorage.getItem('darkMode');
+			let savedMode = null;
+			try { savedMode = localStorage.getItem('darkMode'); } catch (error) {}   // blocked site data: dark by default
 			const isDark = savedMode === null ? true : savedMode === 'true';
+			toggle.setAttribute('aria-pressed', isDark);
 
 			if (isDark) {
 				document.body.classList.add('dark-mode');
@@ -319,7 +322,8 @@
 				document.documentElement.classList.toggle('dark-mode'); // Toggles BOTH tags
 				
 				const nowDark = document.body.classList.contains('dark-mode');
-				localStorage.setItem('darkMode', nowDark);
+				try { localStorage.setItem('darkMode', nowDark); } catch (error) {}   // then the choice lasts for this page only
+				toggle.setAttribute('aria-pressed', nowDark);
 				if (nowDark) {
 					icon.classList.replace('fa-moon', 'fa-sun');
 				} else {
