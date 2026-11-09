@@ -2766,7 +2766,8 @@ input, select, textarea {
 		margin-left: 25%;
 		/* Me he cargado el máximo y parece que va todo automático con la width de abajo */
 		/* max-width: 54em; */
-		padding: 6em 2% 2em 2%;
+		/* The space above the first title is the same as between two sections (from the last line to the next title). */
+		padding: 4.5em 2% 2em 2%;
 		/* He puesto 5% demás en el left, así que quito otros 5% para tenerlos a la dcha y que quede simétrico*/
 		width: calc(100% - 25%);
 	}
@@ -3113,7 +3114,7 @@ input, select, textarea {
 			#main {
 				margin-left: 22%;
 				max-width: none;
-				padding: 6em 2% 3em 2%;
+				padding: 4.5em 2% 3em 2%;
 				width: calc(100% - 22%);
 			}
 
