@@ -2774,8 +2774,8 @@ input, select, textarea {
 
 		#main > section {
 			border-top: solid 2px #efefef;
-			/* El primer valor es lo que dejas por abajo */
-			margin: 1.7em 0 0 0;
+			/* El primer valor es lo que dejas por abajo (the same space above the bar as below it) */
+			margin: 0.9em 0 0 0;
 			/* El primer valor es lo que dejas por arriba (the same space as below the title: see header.major h2) */
 			padding: 0.45em 0 0 0;
 		}
@@ -3285,8 +3285,14 @@ input, select, textarea {
 
 				#main > section {
 					margin: 0 0 0 0;
-					/* As on wider screens, the space above a title is the same as below it. */
-					padding: 0.6em 2% 2.25em 2%;
+					/* As on wider screens, the space above a bar, between the bar and the title, and below the title
+					   is the same. */
+					padding: 0.6em 2% 0.75em 2%;
+				}
+
+				/* The end of the page keeps its space. */
+				#main > section:last-of-type {
+					padding-bottom: 2.25em;
 				}
 
 				#main > section:first-child {
