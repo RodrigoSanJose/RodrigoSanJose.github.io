@@ -1810,8 +1810,16 @@ input, select, textarea {
 		line-height: 1.5em;
 	}
 
+	/* Section titles: the space from the bar above a title to the title is the same as the space from the
+	   title to the text below it (with the padding-top of #main > section). The first paragraph after a
+	   title does not take the negative top margin of the other paragraphs. */
 	header.major h2 {
 		font-size: 2em;
+		margin-bottom: 0.1em;
+	}
+
+	header.major + p {
+		margin-top: 0;
 	}
 
 /* Form */
@@ -2767,8 +2775,8 @@ input, select, textarea {
 			border-top: solid 2px #efefef;
 			/* El primer valor es lo que dejas por abajo */
 			margin: 1.7em 0 0 0;
-			/* El primer valor es lo que dejas por arriba */
-			padding: 1em 0 0 0;
+			/* El primer valor es lo que dejas por arriba (the same space as below the title: see header.major h2) */
+			padding: 0.45em 0 0 0;
 		}
 
 			#main > section:first-child {
@@ -3238,6 +3246,7 @@ input, select, textarea {
 
 			header.major h2 {
 				font-size: 1.35em;
+				margin-bottom: 0.2em;
 			}
 
 		/* List */
@@ -3275,7 +3284,8 @@ input, select, textarea {
 
 				#main > section {
 					margin: 0 0 0 0;
-					padding: 2.25em 2%;
+					/* As on wider screens, the space above a title is the same as below it. */
+					padding: 0.6em 2% 2.25em 2%;
 				}
 
 				#main > section:first-child {
